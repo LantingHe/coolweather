@@ -9,7 +9,7 @@
         android:layout_weight="2"
         android:layout_gravity="center_vertical"
         android:textColor="#fff"
-        android:id="@+id/data_text"/>
+        android:id="@+id/date_text"/>
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
