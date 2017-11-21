@@ -3,10 +3,11 @@ package android.coolweather.com.coolweather.gson;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by hlt on 2017/11/17.
+ *建立Basic
  */
 
 public class Basic {
+    //通过@SerializedName注解的方式来让JSON字段和java字段之间建立映射关系
     @SerializedName("city")
     public String cityName;
 
@@ -14,10 +15,11 @@ public class Basic {
     public String weatherId;
 
     public Update update;
+
     public class Update{
 
         @SerializedName("loc")
-        public String updataTime;
+        public String updateTime;
     }
 
 }

@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 /**
- * Created by hlt on 2017/11/17.
+ * Weather总的实体类
  */
 
 public class Weather {
@@ -15,7 +15,7 @@ public class Weather {
     public AQI aqi;
     public Now now;
     public Suggestion suggestion;
-
+    //总的实体类
     @SerializedName("daily_forecast")
     public List<Forecast> forecastList;
 }

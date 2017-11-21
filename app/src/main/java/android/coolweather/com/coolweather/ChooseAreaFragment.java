@@ -31,7 +31,7 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 /**
- * Created by hlt on 2017/11/17.
+ * 编写用于遍历省市县的数据碎片
  */
 
 public class ChooseAreaFragment extends Fragment {
@@ -44,9 +44,8 @@ public class ChooseAreaFragment extends Fragment {
     private ListView listView;
     private ArrayAdapter<String> adapter;
     private List<String> dataList = new ArrayList<>();
-    /**
-     * 省列表
-     */
+
+    //省列表
     private List<Province> provinceList;
     //市列表
     private List<City> cityList;
@@ -56,24 +55,31 @@ public class ChooseAreaFragment extends Fragment {
     private Province selectedProvince;
     //选中的城市
     private City selectedCity;
+    private County selectedCounty;
     //当前选中的级别
     private int currentLevel;
 
+    /**
+     * 加载choose_area布局，一些控件的实例
+     */
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        //加载choose_area布局及里面的内容
         View view = inflater.inflate(R.layout.choose_area,container,false);
         titleText = (TextView)view.findViewById(R.id.title_text);
         backButton = (Button)view.findViewById(R.id.back_button);
         listView = (ListView)view.findViewById(R.id.list_view);
+        //ArrayAdapter初始化，设置ArrayAdapter为listView的适配器；
         adapter =new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1,dataList);
         listView.setAdapter(adapter);
         return view;
     }
-
+    //listView的点击事件和backButton的点击事件
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        //listView的点击事件
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -85,6 +91,7 @@ public class ChooseAreaFragment extends Fragment {
                     queryCounties();
                 }else if(currentLevel == LEVEL_COUNTY){
                     //把当前选中的县天气id传递过来
+                    selectedCounty = countyList.get(position);
                     String weatherId = countyList.get(position).getWeatherId();
                     if(getActivity()instanceof  MainActivity) {
                         Intent intent = new Intent(getActivity(), WeatherActivity.class);
@@ -100,6 +107,7 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         });
+        //backButton的点击事件
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,24 +118,31 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         });
+        //初始化省级数据
         queryProvinces();
     }
     /**
      *查询全国所有的省，优先从数据库查询，如果没有查询到再去服务器上查询
      */
     private void queryProvinces(){
+        //设置头布局设置为中国
         titleText.setText("中国");
+        //隐藏按钮
         backButton.setVisibility(View.GONE);
+        //调用LitePal的findAll查询接口从Province数据库中读取数据省级数据，如果有地址就直接显示到界面
         provinceList = DataSupport.findAll(Province.class);
         if(provinceList.size()>0){
             dataList.clear();
+            //遍历出来adapter
             for (Province province:provinceList) {
                 dataList.add(province.getProvinceName());
             }
             adapter.notifyDataSetChanged();
+            //界面显示
             listView.setSelection(0);
             currentLevel = LEVEL_PROVINCE;
         }else {
+            //如果没有数据，就调用queryFromServer()方法就把请求地址传入
             String address ="http://guolin.tech/api/china";
             queryFromServer(address,"province");
         }
@@ -182,7 +197,9 @@ public class ChooseAreaFragment extends Fragment {
      * @param type
      */
     private void queryFromServer(String address,final String type){
+        //显示进度对话框
         showProgressDialog();
+        //向服务器发送请求HttpUtil.sendOkHttpRequest()
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -198,6 +215,7 @@ public class ChooseAreaFragment extends Fragment {
 
             /**
              * 根据出入的地址和类型从服务器上查询省市县数据
+             * 响应数据会回调到onResponse()中，之后调用Utility.handleProvinceResponse()来解析和处理服务器的数据并保存到数据库中，
              * @param call
              * @param response
              * @throws IOException
@@ -214,11 +232,15 @@ public class ChooseAreaFragment extends Fragment {
                     result = Utility.handleCountyResponse(responseText,selectedCity.getId());
                 }
                 if(result){
+                    //因为牵扯到UI所以在主线程调用
+                    //runOnUiThread()从子线程切换到主线程；
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            //关闭进度对话框
                             closeProgressDialog();
                             if("province".equals(type)){
+                                //重新加载数据
                                 queryProvinces();
                             }else if("city".equals(type)){
                                 queryCities();

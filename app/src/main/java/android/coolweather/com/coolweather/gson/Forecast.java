@@ -3,7 +3,7 @@ package android.coolweather.com.coolweather.gson;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by hlt on 2017/11/17.
+ * 数组，声明实体类引用的时候使用集体类进行声明
  */
 
 public class Forecast {

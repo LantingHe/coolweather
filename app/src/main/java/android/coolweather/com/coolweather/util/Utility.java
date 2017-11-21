@@ -26,6 +26,7 @@ public class Utility {
                 JSONArray allProvinces = new JSONArray(response);
                 for (int i = 0; i <allProvinces.length() ; i++) {
                     JSONObject provinceObject = allProvinces.getJSONObject(i);
+                    //调用listPal存到数据库中
                     Province province = new Province();
                     province.setProvinceName(provinceObject.getString("name"));
                     province.setProvinceCode(provinceObject.getInt("id"));
@@ -68,10 +69,10 @@ public class Utility {
             try{
                 JSONArray allCounties = new JSONArray(response);
                 for (int i = 0; i <allCounties.length() ; i++) {
-                    JSONObject CountyObject = allCounties.getJSONObject(i);
+                    JSONObject countyObject = allCounties.getJSONObject(i);
                     County county = new County();
-                    county.setCountyName(CountyObject.getString("name"));
-                    county.setWeatherId(CountyObject.getString("id"));
+                    county.setCountyName(countyObject.getString("name"));
+                    county.setWeatherId(countyObject.getString("weather_id"));
                     county.setCityId(cityId);
                     county.save();
                 }
@@ -82,14 +83,16 @@ public class Utility {
         }
         return false;
     }
-    /*
+    /**
     *将返回的JSon数据解析成Weather实体类
      */
     public static Weather handleWeatherResponse(String response){
         try{
+            //jsonObject和jsonArray将天气数据主体内容解析出来
             JSONObject jsonObject = new JSONObject(response);
             JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
             String weatherContent = jsonArray.getJSONObject(0).toString();
+            //通过fromJson()方法直接将JSOn数转换成Weather对象
             return new Gson().fromJson(weatherContent,Weather.class);
         }catch (Exception e){
             e.printStackTrace();
